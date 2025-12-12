@@ -24,10 +24,9 @@ LGREY="\e[97m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
-install_cert="y"
-
 # Global variable to hold the PID of the spinner function
 SPINNER_PID=
+SCRIPT_DIR="$(pwd)"
 
 # Function to draw the spinner animation
 function start_spinner {
@@ -86,27 +85,31 @@ function newcomer() {
 }
 
 function install_ca {
+    foo="${install_cert:=Y}"
     case $install_cert in
         0 | [Yy]|[Ss])
             start_spinner " Instalando CA, ten paciencia"
-            
+
             apt update >>/dev/null 2>&1
             apt install easy-rsa -y >>/dev/null 2>&1
-            
+
             stop_spinner
             echo " Easy-rsa instalado ✅"
 
             ln -s /usr/share/easy-rsa/ ~/
             chmod 700 ~/easy-rsa
 
-            start_spinner " Iniciando el pki"
-            bash ~/easy-rsa/easyrsa init-pki
+            start_spinner " Iniciando el pki y el ca"
+            cd ~/easy-rsa/
+            ./easyrsa init-pki >>/dev/null 2>&1
+            ./easyrsa --batch build-ca nopass >>/dev/null 2>&1
+            cd $SCRIPT_DIR
             stop_spinner
-
-            
         ;;
+
         1 | [Nn])
             echo " Cual es la ubicación de tu CA?"
+            find /root /home /usr/share -name easy-rsa | grep -v '/usr/share/doc'
             read -p " > " ca_dir
         ;;
     esac

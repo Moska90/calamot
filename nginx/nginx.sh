@@ -127,55 +127,6 @@ function vhost_https_server_config() {
     server {
         listen 80;
         listen [::]:80;# Global variable to hold the PID of the spinner function
-SPINNER_PID=
-
-# Function to draw the spinner animation
-function start_spinner {
-    # Define the spinner frames
-    local spin='/-\|'
-    # Define the message to display
-    local message="$1"
-    
-    # 2>&1 means redirect stderr (2) to stdout (1)
-    # The while loop runs in the background
-    (
-        # Turn off case-insensitive matching for shopt (if it were on)
-        # Toggles behavior of shell options
-        trap "echo -e \"\n\n\"" SIGINT # Handle Ctrl+C gracefully
-        
-        while :
-        do
-            # Cycle through the spinner frames
-            for i in $(seq 0 3); do
-                # Get the current frame character
-                local char=${spin:i:1}
-                # Print the frame, overwrite the line using \r (carriage return)
-                printf "\r$message... %s" "$char"
-                sleep 0.1
-            done
-        done
-    ) &
-
-    # Store the PID of the background process so we can kill it later
-    SPINNER_PID=$!
-    # Disown the process so it doesn't get a SIGHUP when the script ends,
-    # though we intend to kill it explicitly.
-    disown
-}
-
-# Function to stop the spinner and clean up
-function stop_spinner {
-    # Check if the spinner process ID is set and running
-    if [[ -n "$SPINNER_PID" ]]; then
-        # Kill the background process
-        kill $SPINNER_PID 2>/dev/null
-        
-        # Clear the line and move the cursor to the beginning
-        printf "\r%40s\r" ""
-        SPINNER_PID=
-    fi
-}
-
 
         server_name $domain www.$domain;
 
@@ -184,11 +135,10 @@ function stop_spinner {
     cp /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
     echo -e "<!DOCTYPE html>
     <html lang="es">
-        <title>PRIME TEAM</title>
+        <title>Moska</title>
         <body>
             <h1>Bienvenido a tu dominio!</h1>
-            <p>Esta es la pagina default de $user,
-            para editar tu pagina web entra por SFTP.</p>
+            <p>Esta es la pagina default de tu dominio: $domain</p>
         </body>
     </html>" > /var/www/$domain/html/index.html
 
@@ -221,7 +171,7 @@ newcomer
 # Check if domain key and crt exist
 check_ssl
 # Configuration of nginx's https
-# vhost_https_server_config
+vhost_https_server_config
 
-# systemctl restart nginx
-# nginx -t
+systemctl restart nginx
+nginx -t
