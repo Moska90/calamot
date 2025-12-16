@@ -2,6 +2,10 @@
 
 # Este script ha sido desarrollado por Moska
 
+# Este script crea el ca y crt y key para un dominio,
+# si solo quieres crear un crt simplemente di que no
+# quieres instalar el ca y selecciona tu ubicación.
+
 # La manera de utilizarlo es comentar aquellas lineas indicadas
 # para dejar de hacer ciertas tareas por ejemplo
 

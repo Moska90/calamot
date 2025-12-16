@@ -2,6 +2,10 @@
 
 # Este script ha sido desarrollado por Moska
 
+# Este script crea el servidor web con nginx y una
+# pagina con dominio, los certificados firmados tienen
+# que estar en /etc/ssl/certs y /etc/ssl/private
+
 # La manera de utilizarlo es comentar aquellas lineas indicadas
 # para dejar de hacer ciertas tareas por ejemplo
 
@@ -77,12 +81,13 @@ function stop_spinner {
 
 # Script
 function check_nginx() {
-    if dpkg -s nginx &>/dev/null then
+    if dpkg -s nginx &>/dev/null; then
         echo " nginx instalado, saltando instalacion"
     else
-        start spinner " Instalando nginx"
+        start_spinner " Instalando nginx"
         apt install nginx -y > /dev/null
         stop_spinner
+    fi
 }
 
 
@@ -98,10 +103,10 @@ function newcomer() {
 }
 
 function check_ssl() {
-    if [ -f ${domain}.key ] && [ -f ${domain}.crt ]; then
+    if [ -f /etc/ssl/private/${domain}.key ] && [ -f /etc/ssl/certs/${domain}.crt ]; then
         echo " $domain key y crt existen, puedes continuar"
     else
-        echo " $domain key y crt no existe, ejecuta./certs.sh en tu ca"
+        echo " $domain key y crt no existe, ejecuta ./certs.sh en tu ca"
         exit
     fi
 }
@@ -173,5 +178,5 @@ check_ssl
 # Configuration of nginx's https
 vhost_https_server_config
 
-systemctl restart nginx
-nginx -t
+systemctl restart nginx >>/dev/null 2>&1
+nginx -t >>/dev/null 2>&1
