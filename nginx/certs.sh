@@ -84,7 +84,7 @@ function newcomer() {
     read -p " > " install_cert
 }
 
-function install_ca {
+function install_ca() {
     foo="${install_cert:=Y}"
     case $install_cert in
         0 | [Yy]|[Ss])
@@ -101,7 +101,7 @@ function install_ca {
 
             start_spinner " Iniciando el pki y el ca"
             cd ~/easy-rsa/
-            ./easyrsa init-pki >>/dev/null 2>&1
+            ./easyrsa --batch init-pki >>/dev/null 2>&1
             ./easyrsa --batch build-ca nopass >>/dev/null 2>&1
             cd $SCRIPT_DIR
             stop_spinner
@@ -115,9 +115,27 @@ function install_ca {
     esac
 }
 
+function gen_crt() {
+    echo " Cual es tu dominio?"
+    read -p " > " domain
+
+    mkdir -p ~/certs/$domain
+    cd ~/certs/$domain
+    openssl genrsa -out ${domain}.key
+    openssl req -new -key ${domain}.key -out ${domain}.req -subj "/CN=$domain/"
+
+    foo="${ca_dir:=$HOME/easy-rsa}"
+    cd $ca_dir
+    ./easyrsa import-req ~/certs/$domain/${domain}.req $domain >>/dev/null 2>&1
+    ./easyrsa --batch sign-req server $domain >>/dev/null 2>&1
+    cp pki/issued/${domain}.crt ~/certs/$domain/
+    echo " Tu crt esta en ~/certs/$domain/"
+}
 
 # Modular part
 # User start
 newcomer
 # CA Server
 install_ca
+# Crt and key
+gen_crt
