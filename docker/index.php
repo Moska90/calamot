@@ -16,6 +16,7 @@ if ($conn->connect_error) {
     echo "<p>Connected to <b>" . $host . "</b> successfully.</p>";
     echo "<p><b>Database:</b> " . $database . "</p>";
     echo "<p><b>Server Version:</b> " . $conn->server_info . "</p>";
+    echo "Hugo Mata";
 }
 
 $conn->close();
