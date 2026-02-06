@@ -1,0 +1,25 @@
+services:
+  apache:
+    image: php:apache
+    container_name: apache
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html/
+    # This installs the driver first, then starts Apache
+    command: sh -c "docker-php-ext-install mysqli && apache2-foreground"
+    depends_on:
+      - maria
+
+  maria:
+    image: mariadb
+    container_name: maria
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: my_database
+    volumes:
+      - maria_data:/var/lib/mysql
+
+volumes:
+  maria_data:
